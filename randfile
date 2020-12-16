@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-usage="$(basename "$0") OPTIONS [size] -- create random file
+set -euo pipefail
+
+usage="$(basename "$0") [-h] [size] [target] -- create random file
 
 OPTIONS:
-    -h          Show this help message
-    -d          Target directory
-    -f          Target file
+    -h		Show this help message
 
 FUNCTION:
-    size        Size in byte or human readable format you want the random file to be
+    size	Size in byte or human readable format, optional.
+    target	Target file or directory, optional.
 "
 usage() {
     echo "$usage"
@@ -25,41 +26,7 @@ done
 if [ $OPTIND -gt 1 ]; then shift $((OPTIND - 1)); fi
 if [ $# -gt 2 ]; then usage; fi
 
-#
-
-dehumanise() {
-    for v in "$@"
-        do
-            echo $v | awk \
-            'BEGIN{IGNORECASE = 1}
-            function printpower(n,b,p) {printf "%u\n", n*b^p;}
-            /[0-9]$/{print $1;next};
-            /K(B)?$/{    printpower($1, 10,  3); next };
-            /M(B)?$/{    printpower($1, 10,  6); next };
-            /G(B)?$/{    printpower($1, 10,  9); next };
-            /T(B)?$/{    printpower($1, 10, 12); next };
-            /Ki(B)?$/{printpower($1,  2, 10); next };
-            /Mi(B)?$/{printpower($1,  2, 20); next };
-            /Gi(B)?$/{printpower($1,  2, 30); next };
-            /Ti(B)?$/{printpower($1,  2, 40); next }'
-        done
-}
-
-humanise() {
-    for v in "$@"
-        do
-            echo $v | awk \
-            'BEGIN{IGNORECASE = 1}
-            function human(x) {
-                if (x<1000) {return x} else {x/=1000}
-                s="kMGTEPYZ";
-                while (x>=1000 && length(s)>1)
-                {x/=1000; s=substr(s,2)}
-                return x substr(s,1,1)
-            }
-            {sub(/^[0-9]+/, human($1)); print $1"B"}'
-        done
-}
+##
 
 # Optional: user specified file size
 if test -z "$1"
