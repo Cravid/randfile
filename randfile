@@ -23,41 +23,38 @@ do
     esac
 done
 
-if [ $OPTIND -gt 1 ]; then shift $((OPTIND - 1)); fi
-if [ $# -gt 2 ]; then usage; fi
+if [ $# -gt 2 ]; then
+    uasge
+elif [ $# -eq 2 ]; then
+    file_size=`dehumanise $1`
+
+    if test -z "$2"; then
+        file_name="/tmp/randfile.`echo date$$ | md5`"
+    elif [[ -f $2 ]]; then
+        # file already exists
+        echo "ERROR: target file already exists"
+        exit 1
+    elif [[ -d $2 ]]; then
+        file_name="`realpath $2`/randfile.`echo date$$ | md5`"
+    else
+        file_name=$2
+    fi
+
+elif [ $# -eq 1 ]; then
+    file_size=`dehumanise $1`
+    file_name="/tmp/randfile.`echo date$$ | md5`"
+else
+    file_size=`dehumanise 1M`
+    file_name="/tmp/randfile.`echo date$$ | md5`"
+fi
 
 ##
-
-# Optional: user specified file size
-if test -z "$1"
-then
-    # default size
-    file_size=`dehumanise 1M`
-else
-    file_size=`dehumanise $1`
-fi
 
 if test -z "$file_size"
 then
     echo "ERROR: could not parse given size"
     usage
     exit 1
-fi
-
-# Optional: user specified target file
-if test -z "$2"
-then
-    file_name="/tmp/randfile.`echo date$$ | md5`"
-elif [[ -f $2 ]]
-then
-    # file already exists
-    echo "ERROR: target file already exists"
-    exit 1
-elif [[ -d $2 ]]
-then
-    file_name="`realpath $2`/randfile.`echo date$$ | md5`"
-else
-    file_name=$2
 fi
 
 if test -z "$file_name"
